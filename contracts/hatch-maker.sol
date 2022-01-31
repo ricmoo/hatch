@@ -19,7 +19,7 @@ interface ResolverMulticoin {
     function addr(bytes32 nodehash, uint coinType) external view returns (address);
 }
 
-interface ENS {
+interface AbstractENS {
     function owner(bytes32 nodehash) external view returns (address);
     function resolver(bytes32) external view returns (address);
 }
@@ -108,7 +108,7 @@ contract Proxy {
 
     function execute(address target, bytes calldata data, uint value) public returns (bool status, bytes memory result) {
         // Owner the controller can call this
-        require(ENS(ens).owner(nodehash) == msg.sender, "not authorized");
+        require(AbstractENS(ens).owner(nodehash) == msg.sender, "not authorized");
 
         // We use assembly so we can call EOAs
         assembly {
@@ -136,7 +136,7 @@ contract Proxy {
 
     function remove() external {
         // Owner the controller can call this
-        require(ENS(ens).owner(nodehash) == msg.sender, "not authorized");
+        require(AbstractENS(ens).owner(nodehash) == msg.sender, "not authorized");
 
         // Send all funds (at the conclusion of this tx) to the nook
         // address, which can be counter-factually deployed later
@@ -157,7 +157,7 @@ contract HatchMaker {
         ens = _ens;
 
         // Set the reverse record
-        address reverseRegistrar = ENS(ens).owner(nodehashReverse);
+        address reverseRegistrar = AbstractENS(ens).owner(nodehashReverse);
         ReverseRegistrar(reverseRegistrar).setName("hatch.eth");
     }
 
@@ -245,7 +245,7 @@ contract HatchMaker {
 
         // Forward the request to the actual resolver, replacing the nodehash
         // with the owner nodehash
-        address resolver = ENS(ens).resolver(ownerNodehash);
+        address resolver = AbstractENS(ens).resolver(ownerNodehash);
         require(resolver != address(0));
 
         // @TODO: Check for wildcard support and use resolve(bytes, bytes) instead

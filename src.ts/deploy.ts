@@ -18,8 +18,8 @@ export async function deploy(path: string = "."): Promise<null> {
     const sources = config.getSources()
     const codebase = build(sources);
 
-    const provider = ethers.getDefaultProvider("http:/\/localhost:8545");
-    const signer = (provider as ethers.providers.JsonRpcProvider).getSigner();
+    let provider = ethers.getDefaultProvider("http:/\/localhost:8545");
+    let signer = (provider as ethers.providers.JsonRpcProvider).getSigner();
 
     //const provider = ethers.getDefaultProvider("ropsten");
     //const signer = new ethers.Wallet("0x5105c98838e8fa8b75dc875fd462163133a0d1969e48661d483c05b561bb3181", provider);
@@ -31,19 +31,35 @@ export async function deploy(path: string = "."): Promise<null> {
         return contract;
     }
 
-    const ens = await deploy("TestENS", [ ]);
-    const mlp = await deploy("HatchMaker", [ ens.address ]);
-    await Promise.all([ ens.deployTransaction.wait(), mlp.deployTransaction.wait() ]);
+    let ens = await deploy("ENS", [ ]);
+    console.log("ENS", ens.address);
+    let hatchMaker = await deploy("HatchMaker", [ ens.address ]);
+    await Promise.all([ ens.deployTransaction.wait(), hatchMaker.deployTransaction.wait() ]);
+    console.log("HATCH", hatchMaker.address);
+
+    const network = provider.network;
+    network.ensAddress = ens.address;
+    console.log("NET", network);
+
+    provider = ethers.getDefaultProvider("http:/\/localhost:8545", network);
+    signer = (provider as ethers.providers.JsonRpcProvider).getSigner();
+    ens = ens.connect(signer);
+    hatchMaker = hatchMaker.connect(signer);
+
+    // Register hatch.eth and set it to the HatchMaker
+    ens.register(ethers.utils.id("hatch"), hatchMaker.address);
+    ens.register(ethers.utils.id("ricmoo"), await signer.getAddress());
+
 
     const ensName = "ricmoo.eth";
     const dnsName = ethers.utils.hexlify(ethers.utils.toUtf8Bytes("\x06ricmoo\x03eth\x00"));
 
-    const proxyAddr = await mlp.addressForName(dnsName);
+    const proxyAddr = await hatchMaker.addressForName(dnsName);
 
     let tx = await ens.setOwner(ethers.utils.namehash(ensName), await signer.getAddress());
     await tx.wait();
 
-    tx = await mlp.deployProxy(dnsName);
+    tx = await hatchMaker.deployProxy(dnsName);
     await tx.wait();
 
     console.log("BB1");
