@@ -1,0 +1,24 @@
+{
+  "name": "wildcard-demo",
+  "version": "0.0.1",
+  "description": "Tests for wildcard ENS name support.",
+  "main": "index.js",
+  "scripts": {
+    "auto-build": "npm run build -- -w",
+    "build": "tsc --build tsconfig.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Ethereum",
+    "ENS"
+  ],
+  "author": "Richard Moore <me@ricmoo.com>",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@types/node": "^17.0.8",
+    "ethers": "^5.5.3",
+    "solc": "^0.8.11",
+    "typescript": "^4.5.4"
+  }
+}

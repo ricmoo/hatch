@@ -1,0 +1,16 @@
+{
+  "contracts": [
+    "./contracts/hatch-maker.sol",
+    "./contracts/test-ens.sol"
+  ],
+  "defaultNetwork": "local",
+  "networks": {
+    "local": {
+      "signers": [ 0 ],
+      "url": "http://localhost:8545"
+    },
+    "ropsten": {
+      "signers": [ "0x5105c98838e8fa8b75dc875fd462163133a0d1969e48661d483c05b561bb3181" ]
+    }
+  }
+}
